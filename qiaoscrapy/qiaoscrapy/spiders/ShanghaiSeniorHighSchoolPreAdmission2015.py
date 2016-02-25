@@ -1,12 +1,15 @@
 # -*- coding: utf-8 -*-
 # 
 # 2015年上海市高中学校“提前招生录取”考生名单
-# http://www.shmeea.edu.cn/20150712.htm
+#
+# Input: http://www.shmeea.edu.cn/20150712.htm
+# Output: 考生编号,录取高中
+# 
 
 import scrapy
 
-class ShanghaiSeniorHighPreAdmission2015 (scrapy.Spider):
-    name = "ShanghaiSeniorHighPreAdmission2015"
+class ShanghaiSeniorHighSchoolPreAdmission2015 (scrapy.Spider):
+    name = "ShanghaiSeniorHighSchoolPreAdmission2015"
     allowed_domains = ["www.shmeea.edu.cn"]
     start_urls = ["http://www.shmeea.edu.cn/20150712.htm"]
     school_name_map = {}
@@ -44,7 +47,5 @@ class ShanghaiSeniorHighPreAdmission2015 (scrapy.Spider):
         idx = range(3, len(students))
         for i in idx:
             stu_no = students[i].xpath("td[2]/text()").extract()
-            if(len(stu_no)==1):
+            if(len(stu_no)==1 and stu_no[0].isdigit()):
                 print stu_no[0].encode("UTF-8") + "," + self.school_name_map[response.url].encode("UTF-8")
-                
-    

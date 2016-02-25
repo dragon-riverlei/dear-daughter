@@ -3,8 +3,8 @@
 
 import scrapy
 
-class XueersiXiaoChuScore2009Spider(scrapy.Spider):
-    name = "XueersiXiaoChuScore2009"
+class XueersiToJuniorHighSchoolScore2009 (scrapy.Spider):
+    name = "XueersiToJuniorHighSchoolScore2009"
     allowed_domains = ["jzb.com"]
     start_urls = ["http://jzb.com/bbs/thread-216777-1-1.html"]
     nextLink = ""
