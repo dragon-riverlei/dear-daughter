@@ -53,7 +53,7 @@ class QiaoEduDB():
             cur.execute("insert into  university values (%s, %s)", (code, name))
         self.db.commit()
 
-    def insert_university_admission0_2015:
+    def insert_university_admission0_2015():
         cur = self.db.cursor()
         for line in open("/cygdrive/d/GitHub/dragon-riverlei/dear-daughter/to04University/2015/admission0").readlines():
             (code, name) = line.split(",")

@@ -14,7 +14,7 @@ class ShanghaiJuniorHighSchoolCode2015 (scrapy.Spider):
     code_map = {}
     
     def parse(self, response):
-        trs =  response.xpath('/html/body/div[4]/div[4]/div[1]/table/tbody/tr')
+        trs =  response.xpath('/html/body/div[4]/div[3]/div[1]/table/tbody/tr')
         for i in range(1, len(trs)):
             values =  trs[i].xpath('td/text()').extract()
             self.code_map[values[2].strip()] = (values[1].strip(), values[3].strip())
