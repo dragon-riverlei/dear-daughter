@@ -26,7 +26,7 @@ class QiaoEduDB():
         for line in open("/cygdrive/d/GitHub/dragon-riverlei/dear-daughter/to02JuniorHigh/2015/shanghaiJuniorHighSchoolCode2015").readlines():
             values = line.split(",")
             (code, area, name) = (values[0], values[1], values[2])
-            cur.execute("insert into  junior_high_school values (%s, %s, %s)", (code, area, name))
+            cur.execute("insert into  junior_high_school values (%s, %s, %s)", (code, area, name.strip()))
         self.db.commit()
 
     def insert_senior_high_school(self):
@@ -36,33 +36,29 @@ class QiaoEduDB():
             values = line.split(",")
             names.add(values[1])
         for name in names:
-            cur.execute("insert into senior_high_school values (%s)", [name])
+            cur.execute("insert into senior_high_school values (%s)", [name.strip()])
         self.db.commit()
 
     def insert_senior_high_school_pre_admission(self):
         cur = self.db.cursor()
         for line in open("/cygdrive/d/GitHub/dragon-riverlei/dear-daughter/to03SeniorHigh/2015/shanghaiSeniorHighSchoolPreAdmission2015").readlines():
             (stu_no, to_school) = line.split(",")
-            cur.execute("insert into  senior_high_school_pre_admission values (%s, %s, %s, %s)", (stu_no, stu_no[2:8], to_school, "2015"))
+            cur.execute("insert into  senior_high_school_pre_admission values (%s, %s, %s, %s)", (stu_no, stu_no[2:8], to_school.strip(), "2015"))
         self.db.commit()
 
     def insert_university(self):
         cur = self.db.cursor()
         for line in open("/cygdrive/d/GitHub/dragon-riverlei/dear-daughter/to04University/candidateUniversityCode").readlines():
             (code, name) = line.split(",")
-            cur.execute("insert into  university values (%s, %s)", (code, name))
+            cur.execute("insert into  university values (%s, %s)", (code, name.strip()))
         self.db.commit()
 
-    def insert_university_admission0_2015():
+    def insert_university_admission0_2015(self):
         cur = self.db.cursor()
         for line in open("/cygdrive/d/GitHub/dragon-riverlei/dear-daughter/to04University/2015/admission0").readlines():
-            (code, name) = line.split(",")
-            cur.execute("insert into  university values (%s, %s)", (code, name))
+            (stu_no, from_name, to_name) = line.split(",")
+            cur.execute("insert into  university_admission0 values (%s, %s, %s, %s)", (stu_no, from_name.strip(), to_name.strip(), 2015))
         self.db.commit()
         
-if __name__ == "__main__":
-    qdb = QiaoEduDB()
-    qdb.insert_junior_high_school()
-    qdb.insert_senior_high_school()
-    qdb.insert_senior_high_school_pre_admission()
-    qdb.insert_university()
+
+    qdb.insert_university_admission0_2015()

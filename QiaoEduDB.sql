@@ -20,3 +20,9 @@ create table if not exists `senior_high_school_pre_admission` (
        `to_name` varchar(40) not null,
        `year` smallint not null
 );
+create table if not exists `university_admission0` (
+       `stu_no` bigint primary key,
+       `from_name` varchar(40) not null,
+       `to_name` varchar(40) not null,
+       `year` smallint not null
+);
