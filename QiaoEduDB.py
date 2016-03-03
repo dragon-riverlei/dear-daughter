@@ -60,5 +60,10 @@ class QiaoEduDB():
             cur.execute("insert into  university_admission0 values (%s, %s, %s, %s)", (stu_no, from_name.strip(), to_name.strip(), 2015))
         self.db.commit()
         
-
+if __name__ == "__main__":
+    qdb = QiaoEduDB()
+    qdb.insert_junior_high_school()
+    qdb.insert_senior_high_school()
+    qdb.insert_senior_high_school_pre_admission()
+    qdb.insert_university()
     qdb.insert_university_admission0_2015()
