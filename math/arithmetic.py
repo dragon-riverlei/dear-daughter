@@ -44,7 +44,7 @@ def index_less_than(count):
 def add_from(frm=10, count=20, complement=False, vertical=False):
     os.system('clear')
     generate(
-        min_op1=frm, max_op1=frm, min_op2=0, max_op2=frm,
+        min_op1=frm, max_op1=frm,
         count=count, op="+", complement=complement, vertical=vertical)
 
 
@@ -87,7 +87,7 @@ def add_to(to=10, count=20, complement=False, vertical=False):
 def sub_from(frm=10, count=20, complement=False, vertical=False):
     os.system('clear')
     generate(
-        min_op1=frm, max_op1=frm, min_op2=0, max_op2=frm,
+        min_op1=frm, max_op1=frm,
         count=count, op="-", complement=complement, vertical=vertical)
 
 
@@ -208,15 +208,17 @@ def do_print(op, op1, op2, complement=False, vertical=False):
 
 
 def reply(expected, layout, values):
-    logger.info("formula begins with " + layout_l % values)
+    logger.info("formula " + layout_l % values + " begins")
     actual = raw_input(layout % values)
     if not actual.isdigit():
-        logger.info("formula ends with error: " + actual)
+        logger.info("formula " + layout_l % values +
+                    " ends with error: " + actual)
         print layout_mark % mark_w
         return
     if expected == int(actual):
-        logger.info("formula ends without error")
+        logger.info("formula " + layout_l % values + " ends")
         print layout_mark % mark_c
     else:
-        logger.info("formula ends with error: " + actual)
+        logger.info("formula " + layout_l % values +
+                    " ends with error: " + actual)
         print layout_mark % mark_w
