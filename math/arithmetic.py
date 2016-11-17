@@ -3,13 +3,26 @@
 import random
 import math
 import os
+import logging
+
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+fh = logging.FileHandler("arithmetic.log")
+fh.setLevel(logging.INFO)
+formatter = logging.Formatter(
+    '%(asctime)s %(name)s %(levelname)s %(message)s')
+fh.setFormatter(formatter)
+logger.addHandler(fh)
 
 mark_c = "✔"
 mark_w = "✘"
 
 layout = "%2s.   %2s %s %2s = %-3s  -> "
-layout_mark = "%27s"
 layout_v = "%2s.       %2s\n%8s  %2s\n      ――――――――\n%12s  -> "
+layout_l = "%2s   %2s %s %2s = %-3s "
+layout_mark = "%27s"
+
 index = 0
 
 
@@ -45,6 +58,10 @@ def add_within(within=10, count=20, complement=False, vertical=False):
 def add_to(to=10, count=20, complement=False, vertical=False):
     os.system('clear')
     reset_index()
+    logger.info(
+        "add_to begins with min_op1=%s,max_op1=%s,min_op2=%s,max_op2=%s,"
+        "op=%s,count=%s,complement=%s,vertical=%s" %
+        (0, to, 0, to, "-", count, complement, vertical))
     op1 = range(0, to + 1)
     op2 = range(0, to + 1)
     while (index_less_than(count)):
@@ -55,7 +72,16 @@ def add_to(to=10, count=20, complement=False, vertical=False):
                 do_print(op="+", op1=op1[i1], op2=op2[i2],
                          complement=complement, vertical=vertical)
             except KeyboardInterrupt:
+                logger.info(
+                    "add_to cancelled with "
+                    "min_op1=%s,max_op1=%s,min_op2=%s,max_op2=%s,"
+                    "op=%s,count=%s,complement=%s,vertical=%s" %
+                    (0, to, 0, to, "-", count, complement, vertical))
                 return
+    logger.info(
+        "add_to ends with min_op1=%s,max_op1=%s,min_op2=%s,max_op2=%s,"
+        "op=%s,count=%s,complement=%s,vertical=%s" %
+        (0, to, 0, to, "-", count, complement, vertical))
 
 
 def sub_from(frm=10, count=20, complement=False, vertical=False):
@@ -74,6 +100,11 @@ def sub_within(within=10, count=20, complement=False, vertical=False):
 
 def sub_to(to=9, count=20, complement=False, vertical=False):
     os.system('clear')
+    reset_index()
+    logger.info(
+        "sub_to begins with min_op1=%s,max_op1=%s,min_op2=%s,max_op2=%s,"
+        "op=%s,count=%s,complement=%s,vertical=%s" %
+        (0, 20, 0, 20, "-", count, complement, vertical))
     op1 = range(0, 21)
     op2 = range(0, 21)
     while (index_less_than(count)):
@@ -84,13 +115,28 @@ def sub_to(to=9, count=20, complement=False, vertical=False):
                 do_print(op="-", op1=op1[i1], op2=op2[i2],
                          complement=complement, vertical=vertical)
             except KeyboardInterrupt:
+                logger.info(
+                    "sub_to cancelled with "
+                    "min_op1=%s,max_op1=%s,min_op2=%s,max_op2=%s,"
+                    "op=%s,count=%s,complement=%s,vertical=%s" %
+                    (0, 20, 0, 20, "-", count, complement, vertical))
                 return
+    logger.info(
+        "sub_to ends with min_op1=%s,max_op1=%s,min_op2=%s,max_op2=%s,"
+        "op=%s,count=%s,complement=%s,vertical=%s" %
+        (0, 20, 0, 20, "-", count, complement, vertical))
 
 
 def generate(min_op1=0, max_op1=20, min_op2=0, max_op2=20,
              count=20, op="", complement=False, vertical=False):
     os.system('clear')
     reset_index()
+    logger.info(
+        "generate begins with "
+        "min_op1=%s,max_op1=%s,min_op2=%s,max_op2=%s,"
+        "op=%s,count=%s,complement=%s,vertical=%s" %
+        (min_op1, max_op1, min_op2, max_op2,
+         "-", count, complement, vertical))
     op1 = range(min_op1, max_op1 + 1)
     op2 = range(min_op2, max_op2 + 1)
     while (index_less_than(count)):
@@ -100,7 +146,19 @@ def generate(min_op1=0, max_op1=20, min_op2=0, max_op2=20,
             do_print(op=op, op1=op1[i1], op2=op2[i2],
                      complement=complement, vertical=vertical)
         except KeyboardInterrupt:
+            logger.info(
+                "generate cancelled with "
+                "min_op1=%s,max_op1=%s,min_op2=%s,max_op2=%s,"
+                "op=%s,count=%s,complement=%s,vertical=%s" %
+                (min_op1, max_op1, min_op2, max_op2,
+                 "-", count, complement, vertical))
             return
+    logger.info(
+        "generate ends with "
+        "min_op1=%s,max_op1=%s,min_op2=%s,max_op2=%s,"
+        "op=%s,count=%s,complement=%s,vertical=%s" %
+        (min_op1, max_op1, min_op2, max_op2,
+         "-", count, complement, vertical))
 
 
 def do_print(op, op1, op2, complement=False, vertical=False):
@@ -109,8 +167,8 @@ def do_print(op, op1, op2, complement=False, vertical=False):
         inc_index()
         expected = op1 + op2
         reply(expected,
-              layout % (index, op1, op, op2, result) if not vertical
-              else layout_v % (index, op1, op, op2, result))
+              layout if not vertical else layout_v,
+              (index, op1, op, op2, result))
         if complement is True:
             inc_index()
             result = op1 + op2
@@ -121,15 +179,15 @@ def do_print(op, op1, op2, complement=False, vertical=False):
                 expected = op2
                 op2 = "?"
             reply(expected,
-                  layout % (index, op1, op, op2, result) if not vertical
-                  else layout_v % (index, op1, op, op2, result))
+                  layout if not vertical else layout_v,
+                  (index, op1, op, op2, result))
     elif op == "-":
         if op1 >= op2:
             inc_index()
             expected = op1 - op2
             reply(expected,
-                  layout % (index, op1, op, op2, result) if not vertical
-                  else layout_v % (index, op1, op, op2, result))
+                  layout if not vertical else layout_v,
+                  (index, op1, op, op2, result))
             if complement is True:
                 inc_index()
                 result = op1 - op2
@@ -140,8 +198,8 @@ def do_print(op, op1, op2, complement=False, vertical=False):
                     expected = op2
                     op2 = "?"
                 reply(expected,
-                      layout % (index, op1, op, op2, result) if not vertical
-                      else layout_v % (index, op1, op, op2, result))
+                      layout if not vertical else layout_v,
+                      (index, op1, op, op2, result))
     else:
         if random.random() > 0.5:
             do_print("+", op1, op2, complement, vertical=vertical)
@@ -149,12 +207,16 @@ def do_print(op, op1, op2, complement=False, vertical=False):
             do_print("-", op1, op2, complement, vertical=vertical)
 
 
-def reply(expected, formula):
-    actual = raw_input(formula)
+def reply(expected, layout, values):
+    logger.info("formula begins with " + layout_l % values)
+    actual = raw_input(layout % values)
     if not actual.isdigit():
+        logger.info("formula ends with error: " + actual)
         print layout_mark % mark_w
         return
     if expected == int(actual):
+        logger.info("formula ends without error")
         print layout_mark % mark_c
     else:
+        logger.info("formula ends with error: " + actual)
         print layout_mark % mark_w
