@@ -98,15 +98,17 @@ def sub_within(within=10, count=20, complement=False, vertical=False):
         count=count, op="-", complement=complement, vertical=vertical)
 
 
-def sub_to(to=9, count=20, complement=False, vertical=False):
+def sub_to(to=9, min_op1=0, max_op1=20, min_op2=0, max_op2=20,
+           count=20, complement=False, vertical=False):
     os.system('clear')
     reset_index()
     logger.info(
         "sub_to begins with min_op1=%s,max_op1=%s,min_op2=%s,max_op2=%s,"
         "op=%s,count=%s,complement=%s,vertical=%s" %
-        (0, 20, 0, 20, "-", count, complement, vertical))
-    op1 = range(0, 21)
-    op2 = range(0, 21)
+        (min_op1, max_op1, min_op2, max_op2,
+         "-", count, complement, vertical))
+    op1 = range(0, max_op1 + 1)
+    op2 = range(0, max_op2 + 1)
     while (index_less_than(count)):
         i1 = int(math.floor(random.random() * len(op1)))
         i2 = int(math.floor(random.random() * len(op2)))
@@ -119,12 +121,14 @@ def sub_to(to=9, count=20, complement=False, vertical=False):
                     "sub_to cancelled with "
                     "min_op1=%s,max_op1=%s,min_op2=%s,max_op2=%s,"
                     "op=%s,count=%s,complement=%s,vertical=%s" %
-                    (0, 20, 0, 20, "-", count, complement, vertical))
+                    (min_op1, max_op1, min_op2, max_op2,
+                     "-", count, complement, vertical))
                 return
     logger.info(
         "sub_to ends with min_op1=%s,max_op1=%s,min_op2=%s,max_op2=%s,"
         "op=%s,count=%s,complement=%s,vertical=%s" %
-        (0, 20, 0, 20, "-", count, complement, vertical))
+        (min_op1, max_op1, min_op2, max_op2,
+         "-", count, complement, vertical))
 
 
 def generate(min_op1=0, max_op1=20, min_op2=0, max_op2=20,
