@@ -24,47 +24,150 @@ layout_2oprd_v = "%2s.       %2s\n%8s  %2s\n      ――――――――\n%12s
 layout_2oprd_log = "%2s   %2s %s %2s = %-3s "
 layout_mark = "%27s"
 
-index = 0
 
-min_default = 0
-max_default = 20
-
-formula_01 = [(min_default, max_default), '+', (min_default, max_default)]
-formula_02 = [(min_default, max_default), '-', (min_default, max_default)]
-formula_03 = [(min_default, max_default), '', (min_default, max_default)]
-formula_04 = [(min_default, max_default), '+', (min_default, max_default),
-              '+', (min_default, max_default)]
-formula_05 = [(min_default, max_default), '+', (min_default, max_default),
-              '-', (min_default, max_default)]
-formula_06 = [(min_default, max_default), '-', (min_default, max_default),
-              '+', (min_default, max_default)]
-formula_07 = [(min_default, max_default), '-', (min_default, max_default),
-              '-', (min_default, max_default)]
-formula_08 = [(min_default, max_default), '', (min_default, max_default),
-              '+', (min_default, max_default)]
-formula_09 = [(min_default, max_default), '', (min_default, max_default),
-              '-', (min_default, max_default)]
-formula_10 = [(min_default, max_default), '', (min_default, max_default),
-              '', (min_default, max_default)]
-
-qpos_1 = 1
-qpos_2 = 2
-qpos_3 = 3
-qpos_4 = 4
-qpos_5 = 5
-qpos_6 = 6
-
-
-def reset_index():
-    global index
+class QiaoArith():
     index = 0
+    min_default = 0
+    max_default = 20
+    valid_operators = {'+', '-', '', '='}
+    valid_operands = {int}
 
+    def __init__(self):
+        self.load_default_formulas()
 
-def inc_index():
-    global index
-    index += 1
+    def load_default_formulas(self):
+        self.formula_1_1 = [(self.min_default, self.max_default),
+                            '+',
+                            (self.min_default, self.max_default)]
+        self.formula_1_2 = [(self.min_default, self.max_default),
+                            '-',
+                            (self.min_default, self.max_default)]
+        self.formula_1_3 = [(self.min_default, self.max_default),
+                            '',
+                            (self.min_default, self.max_default)]
 
+        self.formula_2_1 = [(self.min_default, self.max_default),
+                            '+',
+                            (self.min_default, self.max_default),
+                            '+',
+                            (self.min_default, self.max_default)]
+        self.formula_2_2 = [(self.min_default, self.max_default),
+                            '+',
+                            (self.min_default, self.max_default),
+                            '-',
+                            (self.min_default, self.max_default)]
+        self.formula_2_3 = [(self.min_default, self.max_default),
+                            '+',
+                            (self.min_default, self.max_default),
+                            '',
+                            (self.min_default, self.max_default)]
+        self.formula_2_4 = [(self.min_default, self.max_default),
+                            '-',
+                            (self.min_default, self.max_default),
+                            '+',
+                            (self.min_default, self.max_default)]
+        self.formula_2_5 = [(self.min_default, self.max_default),
+                            '-',
+                            (self.min_default, self.max_default),
+                            '-',
+                            (self.min_default, self.max_default)]
+        self.formula_2_6 = [(self.min_default, self.max_default),
+                            '-',
+                            (self.min_default, self.max_default),
+                            '',
+                            (self.min_default, self.max_default)]
+        self.formula_2_7 = [(self.min_default, self.max_default),
+                            '',
+                            (self.min_default, self.max_default),
+                            '+',
+                            (self.min_default, self.max_default)]
+        self.formula_2_8 = [(self.min_default, self.max_default),
+                            '',
+                            (self.min_default, self.max_default),
+                            '-',
+                            (self.min_default, self.max_default)]
+        self.formula_2_9 = [(self.min_default, self.max_default),
+                            '',
+                            (self.min_default, self.max_default),
+                            '',
+                            (self.min_default, self.max_default)]
 
-def index_less_than(count):
-    global index
-    return index < count
+    def reset_default_formulas(self, min_default, max_default):
+        self.min_default = min_default
+        self.max_default = max_default
+        self.load_default_formulas()
+
+    def reset_index(self):
+        self.index = 0
+
+    def inc_index(self):
+        self.index += 1
+
+    def index_less_than(self, count):
+        return self.index < count
+
+    def validate_formula(self, formula):
+        if formula is None:
+            return False
+
+        # at least 3 elements in a formula
+        if len(formula) < 3:
+            print "At least 3 elements in a formula."
+            print "Number of elements in the given formula is: " + len(formula)
+            return False
+
+        # number of elements in a formula should be odd
+        if len(formula) % 2 == 0:
+            print "Number of elements in a formula should be odd."
+            print "Number of elements in the given formula is: " + len(formula)
+            return False
+
+        # operators in a formula should be supported
+        for operator in formula[1::2]:
+            if operator not in self.valid_operators:
+                print "Operators in a formula should be supported."
+                print "Found unsupported operator: " + operator
+                return False
+
+        # types of operands in a formula should be supported
+        for operand in formula[0::2]:
+            if(len(operand) != 2):
+                print "Operand in a formula should have exactly 2 elements."
+                print "Found invalid operand: " + operand
+                return False
+            if not (type(operand[0]) in self.valid_operands and
+                    type(operand[1]) in self.valid_operands and
+                    operand[0] <= operand[1]):
+                print "Operand in a formula should be the supported type" \
+                      "with 2nd no less than 1st."
+                print "Found invalid operand: " + operand
+                return False
+
+    def generate(self, formula=None, count=20):
+        if formula is None:
+            print "No formula specified."
+            return
+        if self.validate_formula(formula):
+            print "Invalid formula."
+            return
+        os.system('clear')
+        self.reset_index()
+        logger.info(
+            "generate begins with formula " + formula)
+        if formula[-2:] == '=':
+            while(self.index_less_than(count)):
+                if self.backward_scan(formula):
+                    self.inc_index()
+        else:
+            while(self.index_less_than(count)):
+                if self.forward_scan(formula):
+                    self.inc_index()
+
+    def forward_scan(self, formula):
+        if len(formula) % 2 == 0:
+            pass
+        else:
+            head = formula[0]
+            tail = formula[1:]
+
+    def backward_scan(self, formula):
