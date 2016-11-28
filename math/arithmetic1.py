@@ -176,29 +176,29 @@ class QiaoArith():
                 op = "+"
             else:
                 op = "-"
-        op1s = range(formula[0][0], formula[0][1] + 1)
-        op2s = range(formula[2][0], formula[2][1] + 1)
-        i1 = int(math.floor(random.random() * len(op1s)))
-        i2 = int(math.floor(random.random() * len(op2s)))
         if type(formula[0]) is tuple:
-            op1 = range(formula[0][0], formula[0][1] + 1)[i1]
+            op1s = range(formula[0][0], formula[0][1] + 1)
+            i1 = int(math.floor(random.random() * len(op1s)))
+            op1 = op1s[i1]
         else:
             op1 = formula[0]
+        op2s = range(formula[2][0], formula[2][1] + 1)
+        i2 = int(math.floor(random.random() * len(op2s)))
         op2 = op2s[i2]
-        while (op == "-" and op1 < op2s[i2]):
+        while (op == "-" and op1 < op2):
             i2 = int(math.floor(random.random() * len(op2s)))
             op2 = op2s[i2]
         if len(formula) == 3:
             return [op1, op, op2]
         else:
             r = self.calculate(op1, op, op2)
-            f = [[r].append(e) for e in formula[3:]]
-            return [[op1, op, op2].append(ee) for ee in self.forward_scan(f)]
+            f = [r] + formula[3:]
+            return [op1, op, op2] + self.forward_scan(f)[1:]
 
     def backward_scan(self, formula):
         pass
 
-    def calculate(op1, op, op2):
+    def calculate(self, op1, op, op2):
         if op == "+":
             return op1 + op2
         else:
