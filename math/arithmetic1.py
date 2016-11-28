@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import enum
 import logging
 import math
 import os
@@ -152,22 +151,55 @@ class QiaoArith():
             return
         os.system('clear')
         self.reset_index()
+        equations = []
         logger.info(
-            "generate begins with formula " + formula)
+            "generate begins with formula " + str(formula))
         if formula[-2:] == '=':
             while(self.index_less_than(count)):
-                if self.backward_scan(formula):
+                equation = self.backward_scan(formula)
+                if equation is not None:
+                    equations.append(equation)
                     self.inc_index()
         else:
             while(self.index_less_than(count)):
-                if self.forward_scan(formula):
+                equation = self.forward_scan(formula)
+                if equation is not None:
+                    equations.append(equation)
                     self.inc_index()
+        for e in equations:
+            print e
 
     def forward_scan(self, formula):
-        if len(formula) % 2 == 0:
-            pass
+        op = formula[1]
+        if op == "":
+            if random.random() > 0.5:
+                op = "+"
+            else:
+                op = "-"
+        op1s = range(formula[0][0], formula[0][1] + 1)
+        op2s = range(formula[2][0], formula[2][1] + 1)
+        i1 = int(math.floor(random.random() * len(op1s)))
+        i2 = int(math.floor(random.random() * len(op2s)))
+        if type(formula[0]) is tuple:
+            op1 = range(formula[0][0], formula[0][1] + 1)[i1]
         else:
-            head = formula[0]
-            tail = formula[1:]
+            op1 = formula[0]
+        op2 = op2s[i2]
+        while (op == "-" and op1 < op2s[i2]):
+            i2 = int(math.floor(random.random() * len(op2s)))
+            op2 = op2s[i2]
+        if len(formula) == 3:
+            return [op1, op, op2]
+        else:
+            r = self.calculate(op1, op, op2)
+            f = [[r].append(e) for e in formula[3:]]
+            return [[op1, op, op2].append(ee) for ee in self.forward_scan(f)]
 
     def backward_scan(self, formula):
+        pass
+
+    def calculate(op1, op, op2):
+        if op == "+":
+            return op1 + op2
+        else:
+            return op1 - op2
