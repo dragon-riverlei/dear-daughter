@@ -18,18 +18,21 @@ logger.addHandler(fh)
 mark_c = "✔"
 mark_w = "✘"
 
-layout_2oprd = "%2s.   %2s %s %2s = %-3s  -> "
+layout_2oprd = "%2s.   %2s %s %2s %s %-3s  -> "
+layout_3oprd = "%2s.   %2s %s %2s %s %2s %s %-3s  -> "
 layout_2oprd_v = "%2s.       %2s\n%8s  %2s\n      ――――――――\n%12s  -> "
-layout_2oprd_log = "%2s   %2s %s %2s = %-3s "
-layout_mark = "%27s"
+layout_2oprd_log = "%2s   %2s %s %2s %s %-3s "
+layout_3oprd_log = "%2s   %2s %s %2s %s %2s %s %-3s "
+layout_2oprd_mark = "%27s"
+layout_3oprd_mark = "%36s"
 
 
 class QiaoArith():
     index = 0
     min_default = 0
     max_default = 20
-    valid_operators = {'+', '-', '', '='}
-    valid_operands = {int}
+    valid_operators = ['+', '-', '', '=', '?']
+    valid_operands = [int]
 
     def __init__(self):
         self.load_default_formulas()
@@ -142,13 +145,15 @@ class QiaoArith():
                 print "Found invalid operand: " + operand
                 return False
 
-    def generate(self, formula=None, count=20):
+    def generate(self, formula=None, count=20, qpos="last"):
         if formula is None:
             print "No formula specified."
             return
         if self.validate_formula(formula):
             print "Invalid formula."
             return
+        if not qpos == "last" and not str(qpos).isalnum():
+            raise ValueError('qpos must be "last" or number.')
         os.system('clear')
         self.reset_index()
         equations = []
@@ -164,10 +169,28 @@ class QiaoArith():
             while(self.index_less_than(count)):
                 equation = self.forward_scan(formula)
                 if equation is not None:
-                    equations.append(equation)
+                    head = (self.valid_operators[0], equation[0])
+                    tail = zip(equation[1::2], equation[2::2])
+                    result = reduce(self.calculate_wrapper, tail, head)[1]
+                    equations.append(
+                        equation + [self.valid_operators[3], result])
                     self.inc_index()
-        for e in equations:
-            print e
+        if qpos == "last":
+            qpos = len(equations[0])
+        elif int(qpos) > len(equations[0]):
+            qpos = len(equations[0])
+        else:
+            qpos = int(qpos)
+        try:
+            index = 1
+            for e in equations:
+                expected = e[qpos - 1]
+                e[qpos - 1] = self.valid_operators[4]
+                self.display_reply(expected, e, index)
+                index += 1
+        except KeyboardInterrupt:
+            logger.info(
+                "generate cancelled with formula " + str(formula))
 
     def forward_scan(self, formula):
         op = formula[1]
@@ -199,7 +222,33 @@ class QiaoArith():
         pass
 
     def calculate(self, op1, op, op2):
-        if op == "+":
+        if op == self.valid_operators[0]:
             return op1 + op2
-        else:
+        elif op == self.valid_operators[1]:
             return op1 - op2
+        else:
+            raise ValueError('Non-supported operator: ' + op)
+
+    def calculate_wrapper(self, x, y):
+        r = self.calculate(x[1], y[0], y[1])
+        return (self.valid_operators[0], r)
+
+    def display_reply(self, expected, equation, index):
+        if len(equation) == 5:
+            layout = layout_2oprd
+            layout_log = layout_2oprd_log
+            layout_mark = layout_2oprd_mark
+        elif len(equation) == 7:
+            layout = layout_3oprd
+            layout_log = layout_3oprd_log
+            layout_mark = layout_3oprd_mark
+        e = tuple([index] + equation)
+        logger.info("formula " + layout_log % e + " begins")
+        actual = raw_input(layout % e)
+        if str(expected) == actual:
+            logger.info("formula " + layout_log % e + " ends")
+            print layout_mark % mark_c
+        else:
+            logger.info("formula " + layout_log % e +
+                        " ends with error: " + actual)
+            print layout_mark % mark_w
