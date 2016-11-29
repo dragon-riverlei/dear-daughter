@@ -33,6 +33,7 @@ class QiaoArith():
     max_default = 20
     valid_operators = ['+', '-', '', '=', '?']
     valid_operands = [int]
+    vertical = False
 
     def __init__(self):
         self.load_default_formulas()
@@ -234,6 +235,12 @@ class QiaoArith():
         return (self.valid_operators[0], r)
 
     def display_reply(self, expected, equation, index):
+        if self.vertical:
+            self.display_reply_v(expected, equation, index)
+        else:
+            self.display_reply_h(expected, equation, index)
+
+    def display_reply_h(self, expected, equation, index):
         if len(equation) == 5:
             layout = layout_2oprd
             layout_log = layout_2oprd_log
@@ -243,12 +250,34 @@ class QiaoArith():
             layout_log = layout_3oprd_log
             layout_mark = layout_3oprd_mark
         e = tuple([index] + equation)
-        logger.info("formula " + layout_log % e + " begins")
+        logger.info("formula " +
+                    layout_log % tuple([index] + equation) + " begins")
         actual = raw_input(layout % e)
         if str(expected) == actual:
-            logger.info("formula " + layout_log % e + " ends")
+            logger.info("formula " +
+                        layout_log % tuple([index] + equation) + " ends")
             print layout_mark % mark_c
         else:
-            logger.info("formula " + layout_log % e +
+            logger.info("formula " +
+                        layout_log % tuple([index] + equation) +
+                        " ends with error: " + actual)
+            print layout_mark % mark_w
+
+    def display_reply_v(self, expected, equation, index):
+        if len(equation) == 5:
+            layout = layout_2oprd_v
+            layout_log = layout_2oprd_log
+            layout_mark = layout_2oprd_mark
+            e = tuple([index] + equation[0:3] + [equation[4]])
+        logger.info("formula " +
+                    layout_log % tuple([index] + equation) + " begins")
+        actual = raw_input(layout % e)
+        if str(expected) == actual:
+            logger.info("formula " +
+                        layout_log % tuple([index] + equation) + " ends")
+            print layout_mark % mark_c
+        else:
+            logger.info("formula " +
+                        layout_log % tuple([index] + equation) +
                         " ends with error: " + actual)
             print layout_mark % mark_w
