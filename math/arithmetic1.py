@@ -142,17 +142,43 @@ class QiaoArith():
                 return False
             if not (type(operand[0]) in self.valid_operands and
                     type(operand[1]) in self.valid_operands and
-                    operand[0] <= operand[1]):
+                    operand[0] < operand[1]):
                 print "Operand in a formula should be the supported type" \
-                      "with 2nd no less than 1st."
+                      "with 2nd greater than 1st."
                 print "Found invalid operand: " + operand
                 return False
+
+        # further validation when the result has constraints
+        if formula[-2] == '=':
+            lb, ub = formula[0]
+            for e in zip(formula[1:len(formula)-1:2],
+                         formula[2:len(formula)-1:2]):
+                if e[0] == "+":
+                    ub = ub + e[1][1]
+                    lb = lb + e[1][0]
+                elif e[0] == "-":
+                    if ub <= e[1][0]:
+                        print "No or not enought intersect between " + \
+                              str((lb, ub)) + ":" + str(e[1])
+                        return False
+                    ub = ub - e[1][0]
+                    if lb >= e[1][1]:
+                        lb = lb - e[1][1]
+                    else:
+                        lb = 0
+                else:
+                    print "Operator should not be empty " \
+                          "when result is specified."
+            expected = range(formula[-1][0], formula[-1][1]+1)
+            got = range(lb, ub+1)
+            if len(set(expected) & set(got)) > 0:
+                print "Specified result range out of possible range."
 
     def generate(self, formula=None, count=20, qpos="last"):
         if formula is None:
             print "No formula specified."
             return
-        if self.validate_formula(formula):
+        if not self.validate_formula(formula):
             print "Invalid formula."
             return
         if not qpos == "last" and not str(qpos).isalnum():
@@ -162,7 +188,7 @@ class QiaoArith():
         equations = []
         logger.info(
             "generate begins with formula " + str(formula))
-        if formula[-2:] == '=':
+        if formula[-2] == '=':
             while(self.index_less_than(count)):
                 equation = self.backward_scan(formula)
                 if equation is not None:
@@ -222,7 +248,7 @@ class QiaoArith():
             return [op1, op, op2] + self.forward_scan(f)[1:]
 
     def backward_scan(self, formula):
-        pass
+        return ("", "")
 
     def calculate(self, op1, op, op2):
         if op == self.valid_operators[0]:
