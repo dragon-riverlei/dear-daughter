@@ -21,6 +21,7 @@ mark_w = "✘"
 layout_2oprd = "%2s.   %2s %s %2s %s %-3s  -> "
 layout_3oprd = "%2s.   %2s %s %2s %s %2s %s %-3s  -> "
 layout_2oprd_v = "%2s.       %2s\n%8s  %2s\n      ――――――――\n%12s  -> "
+layout_3oprd_v = "%2s.       %2s\n%8s  %2s\n%8s  %2s\n      ――――――――\n%12s  -> "
 layout_2oprd_log = "%2s   %2s %s %2s %s %-3s "
 layout_3oprd_log = "%2s   %2s %s %2s %s %2s %s %-3s "
 layout_2oprd_mark = "%27s"
@@ -269,6 +270,11 @@ class QiaoArith():
             layout_log = layout_2oprd_log
             layout_mark = layout_2oprd_mark
             e = tuple([index] + equation[0:3] + [equation[4]])
+        elif len(equation) == 7:
+            layout = layout_3oprd_v
+            layout_log = layout_3oprd_log
+            layout_mark = layout_3oprd_mark
+            e = tuple([index] + equation[0:5] + [equation[6]])
         logger.info("formula " +
                     layout_log % tuple([index] + equation) + " begins")
         actual = raw_input(layout % e)
