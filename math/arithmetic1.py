@@ -173,6 +173,8 @@ class QiaoArith():
             got = range(lb, ub+1)
             if len(set(expected) & set(got)) > 0:
                 print "Specified result range out of possible range."
+                return False
+        return True
 
     def generate(self, formula=None, count=20, qpos="last"):
         if formula is None:
