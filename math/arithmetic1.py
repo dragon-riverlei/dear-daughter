@@ -4,6 +4,7 @@ import logging
 import math
 import os
 import random
+import time
 
 
 logger = logging.getLogger(__name__)
@@ -15,21 +16,28 @@ formatter = logging.Formatter(
 fh.setFormatter(formatter)
 logger.addHandler(fh)
 
-mark_c = "✔"
-mark_w = "✘"
-
-layout_2oprd = "%2s.   %2s %s %2s %s %-3s  -> "
-layout_3oprd = "%2s.   %2s %s %2s %s %2s %s %-3s  -> "
-layout_2oprd_v = "%2s.       %2s\n%8s  %2s\n      ――――――――\n%12s  -> "
-layout_3oprd_v = "%2s.       %2s\n%8s  %2s\n%8s  %2s\n      ――――――――" \
-                 "\n%12s  -> "
-layout_2oprd_log = "%2s   %2s %s %2s %s %-3s "
-layout_3oprd_log = "%2s   %2s %s %2s %s %2s %s %-3s "
-layout_2oprd_mark = "%27s"
-layout_3oprd_mark = "%36s"
-
 
 class QiaoArith():
+    mark_c = "✔"
+    mark_w = "✘"
+    mark_rank = "❆"
+    rank_0 = 30
+    rank_1 = 20
+    rank_2 = 15
+    rank_3 = 10
+    rank_4 = 5
+    rank_5 = 2
+
+    layout_2oprd = "%2s.   %2s %s %2s %s %-3s  -> "
+    layout_3oprd = "%2s.   %2s %s %2s %s %2s %s %-3s  -> "
+    layout_2oprd_v = "%2s.       %2s\n%8s  %2s\n      ――――――――\n%12s  -> "
+    layout_3oprd_v = "%2s.       %2s\n%8s  %2s\n%8s  %2s\n      ――――――――" \
+                     "\n%12s  -> "
+    layout_2oprd_log = "%2s   %2s %s %2s %s %-3s "
+    layout_3oprd_log = "%2s   %2s %s %2s %s %2s %s %-3s "
+    layout_2oprd_mark = "%27s %5.1f %5s"
+    layout_3oprd_mark = "%36s %5.1f %5s"
+
     index = 0
     min_default = 0
     max_default = 20
@@ -272,47 +280,83 @@ class QiaoArith():
 
     def display_reply_h(self, expected, equation, index):
         if len(equation) == 5:
-            layout = layout_2oprd
-            layout_log = layout_2oprd_log
-            layout_mark = layout_2oprd_mark
+            layout = self.layout_2oprd
+            layout_log = self.layout_2oprd_log
+            layout_mark = self.layout_2oprd_mark
         elif len(equation) == 7:
-            layout = layout_3oprd
-            layout_log = layout_3oprd_log
-            layout_mark = layout_3oprd_mark
+            layout = self.layout_3oprd
+            layout_log = self.layout_3oprd_log
+            layout_mark = self.layout_3oprd_mark
         e = tuple([index] + equation)
         logger.info("formula " +
                     layout_log % tuple([index] + equation) + " begins")
+        start = time.time()
         actual = raw_input(layout % e)
+        end = time.time()
+        spent = end - start
+        rankn = 0
+        if spent >= self.rank_0:
+            rankn = 0
+        elif spent >= self.rank_1:
+            rankn = 1
+        elif spent >= self.rank_2:
+            rankn = 2
+        elif spent >= self.rank_3:
+            rankn = 3
+        elif spent >= self.rank_4:
+            rankn = 4
+        else:
+            rankn = 5
+        rank_txt = self.mark_rank * rankn
         if str(expected) == actual:
             logger.info("formula " +
                         layout_log % tuple([index] + equation) + " ends")
-            print layout_mark % mark_c
+            print layout_mark % (self.mark_c, spent, rank_txt)
         else:
             logger.info("formula " +
                         layout_log % tuple([index] + equation) +
                         " ends with error: " + actual)
-            print layout_mark % mark_w
+            print layout_mark % (self.mark_c, spent, rank_txt)
 
     def display_reply_v(self, expected, equation, index):
         if len(equation) == 5:
-            layout = layout_2oprd_v
-            layout_log = layout_2oprd_log
-            layout_mark = layout_2oprd_mark
+            layout = self.layout_2oprd_v
+            layout_log = self.layout_2oprd_log
+            layout_mark = self.layout_2oprd_mark
             e = tuple([index] + equation[0:3] + [equation[4]])
         elif len(equation) == 7:
-            layout = layout_3oprd_v
-            layout_log = layout_3oprd_log
-            layout_mark = layout_3oprd_mark
+            layout = self.layout_3oprd_v
+            layout_log = self.layout_3oprd_log
+            layout_mark = self.layout_3oprd_mark
             e = tuple([index] + equation[0:5] + [equation[6]])
         logger.info("formula " +
                     layout_log % tuple([index] + equation) + " begins")
+        start = time.time()
         actual = raw_input(layout % e)
+        end = time.time()
+        spent = end - start
+        rankn = 0
+        if spent >= self.rank_0:
+            rankn = 0
+        elif spent >= self.rank_1:
+            rankn = 1
+        elif spent >= self.rank_2:
+            rankn = 2
+        elif spent >= self.rank_3:
+            rankn = 3
+        elif spent >= self.rank_4:
+            rankn = 4
+        elif spent >= self.rank_5:
+            rankn = 5
+        else:
+            rankn = 6
+        rank_txt = self.mark_rank * rankn
         if str(expected) == actual:
             logger.info("formula " +
                         layout_log % tuple([index] + equation) + " ends")
-            print layout_mark % mark_c
+            print layout_mark % (self.mark_c, spent, rank_txt)
         else:
             logger.info("formula " +
                         layout_log % tuple([index] + equation) +
                         " ends with error: " + actual)
-            print layout_mark % mark_w
+            print layout_mark % (self.mark_w, spent, rank_txt)
