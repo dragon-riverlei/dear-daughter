@@ -2,6 +2,7 @@
 
 import logging
 import math
+import numpy
 import os
 import random
 import time
@@ -21,6 +22,8 @@ class QiaoArith():
     mark_c = "✔"
     mark_w = "✘"
     mark_rank = "❆"
+
+    rank_on = False
     rank_0 = 30
     rank_1 = 20
     rank_2 = 15
@@ -49,61 +52,61 @@ class QiaoArith():
         self.load_default_formulas()
 
     def load_default_formulas(self):
-        self.formula_1_1 = [(self.min_default, self.max_default),
-                            '+',
-                            (self.min_default, self.max_default)]
-        self.formula_1_2 = [(self.min_default, self.max_default),
-                            '-',
-                            (self.min_default, self.max_default)]
-        self.formula_1_3 = [(self.min_default, self.max_default),
-                            '',
-                            (self.min_default, self.max_default)]
+        self.f1_1 = [(self.min_default, self.max_default),
+                     '+',
+                     (self.min_default, self.max_default)]
+        self.f1_2 = [(self.min_default, self.max_default),
+                     '-',
+                     (self.min_default, self.max_default)]
+        self.f1_3 = [(self.min_default, self.max_default),
+                     '',
+                     (self.min_default, self.max_default)]
 
-        self.formula_2_1 = [(self.min_default, self.max_default),
-                            '+',
-                            (self.min_default, self.max_default),
-                            '+',
-                            (self.min_default, self.max_default)]
-        self.formula_2_2 = [(self.min_default, self.max_default),
-                            '+',
-                            (self.min_default, self.max_default),
-                            '-',
-                            (self.min_default, self.max_default)]
-        self.formula_2_3 = [(self.min_default, self.max_default),
-                            '+',
-                            (self.min_default, self.max_default),
-                            '',
-                            (self.min_default, self.max_default)]
-        self.formula_2_4 = [(self.min_default, self.max_default),
-                            '-',
-                            (self.min_default, self.max_default),
-                            '+',
-                            (self.min_default, self.max_default)]
-        self.formula_2_5 = [(self.min_default, self.max_default),
-                            '-',
-                            (self.min_default, self.max_default),
-                            '-',
-                            (self.min_default, self.max_default)]
-        self.formula_2_6 = [(self.min_default, self.max_default),
-                            '-',
-                            (self.min_default, self.max_default),
-                            '',
-                            (self.min_default, self.max_default)]
-        self.formula_2_7 = [(self.min_default, self.max_default),
-                            '',
-                            (self.min_default, self.max_default),
-                            '+',
-                            (self.min_default, self.max_default)]
-        self.formula_2_8 = [(self.min_default, self.max_default),
-                            '',
-                            (self.min_default, self.max_default),
-                            '-',
-                            (self.min_default, self.max_default)]
-        self.formula_2_9 = [(self.min_default, self.max_default),
-                            '',
-                            (self.min_default, self.max_default),
-                            '',
-                            (self.min_default, self.max_default)]
+        self.f2_1 = [(self.min_default, self.max_default),
+                     '+',
+                     (self.min_default, self.max_default),
+                     '+',
+                     (self.min_default, self.max_default)]
+        self.f2_2 = [(self.min_default, self.max_default),
+                     '+',
+                     (self.min_default, self.max_default),
+                     '-',
+                     (self.min_default, self.max_default)]
+        self.f2_3 = [(self.min_default, self.max_default),
+                     '+',
+                     (self.min_default, self.max_default),
+                     '',
+                     (self.min_default, self.max_default)]
+        self.f2_4 = [(self.min_default, self.max_default),
+                     '-',
+                     (self.min_default, self.max_default),
+                     '+',
+                     (self.min_default, self.max_default)]
+        self.f2_5 = [(self.min_default, self.max_default),
+                     '-',
+                     (self.min_default, self.max_default),
+                     '-',
+                     (self.min_default, self.max_default)]
+        self.f2_6 = [(self.min_default, self.max_default),
+                     '-',
+                     (self.min_default, self.max_default),
+                     '',
+                     (self.min_default, self.max_default)]
+        self.f2_7 = [(self.min_default, self.max_default),
+                     '',
+                     (self.min_default, self.max_default),
+                     '+',
+                     (self.min_default, self.max_default)]
+        self.f2_8 = [(self.min_default, self.max_default),
+                     '',
+                     (self.min_default, self.max_default),
+                     '-',
+                     (self.min_default, self.max_default)]
+        self.f2_9 = [(self.min_default, self.max_default),
+                     '',
+                     (self.min_default, self.max_default),
+                     '',
+                     (self.min_default, self.max_default)]
 
     def reset_default_formulas(self, min_default, max_default):
         self.min_default = min_default
@@ -222,14 +225,22 @@ class QiaoArith():
             qpos = int(qpos)
         try:
             index = 1
+            results = []
             for e in equations:
                 expected = e[qpos - 1]
                 e[qpos - 1] = self.valid_operators[4]
-                self.display_reply(expected, e, index)
+                results.append(self.display_reply(expected, e, index))
                 index += 1
         except KeyboardInterrupt:
             logger.info(
                 "generate cancelled with formula " + str(formula))
+        times = [r[0] for r in results]
+        average = numpy.mean(times)
+        rank_txt = self.rank_txt(average)
+        corrects = [r[1] for r in results if r[1] is True]
+        print str(len(corrects)) + " correct out of " + str(len(results))
+        if self.rank_on:
+            print "Average speed:" + rank_txt
 
     def forward_scan(self, formula):
         op = formula[1]
@@ -274,9 +285,9 @@ class QiaoArith():
 
     def display_reply(self, expected, equation, index):
         if self.vertical:
-            self.display_reply_v(expected, equation, index)
+            return self.display_reply_v(expected, equation, index)
         else:
-            self.display_reply_h(expected, equation, index)
+            return self.display_reply_h(expected, equation, index)
 
     def display_reply_h(self, expected, equation, index):
         if len(equation) == 5:
@@ -294,29 +305,20 @@ class QiaoArith():
         actual = raw_input(layout % e)
         end = time.time()
         spent = end - start
-        rankn = 0
-        if spent >= self.rank_0:
-            rankn = 0
-        elif spent >= self.rank_1:
-            rankn = 1
-        elif spent >= self.rank_2:
-            rankn = 2
-        elif spent >= self.rank_3:
-            rankn = 3
-        elif spent >= self.rank_4:
-            rankn = 4
-        else:
-            rankn = 5
-        rank_txt = self.mark_rank * rankn
+        rank_txt = ""
+        if self.rank_on:
+            rank_txt = self.rank_txt(spent)
         if str(expected) == actual:
             logger.info("formula " +
                         layout_log % tuple([index] + equation) + " ends")
             print layout_mark % (self.mark_c, spent, rank_txt)
+            return (spent, True)
         else:
             logger.info("formula " +
                         layout_log % tuple([index] + equation) +
                         " ends with error: " + actual)
             print layout_mark % (self.mark_c, spent, rank_txt)
+            return (spent, False)
 
     def display_reply_v(self, expected, equation, index):
         if len(equation) == 5:
@@ -335,28 +337,35 @@ class QiaoArith():
         actual = raw_input(layout % e)
         end = time.time()
         spent = end - start
-        rankn = 0
-        if spent >= self.rank_0:
-            rankn = 0
-        elif spent >= self.rank_1:
-            rankn = 1
-        elif spent >= self.rank_2:
-            rankn = 2
-        elif spent >= self.rank_3:
-            rankn = 3
-        elif spent >= self.rank_4:
-            rankn = 4
-        elif spent >= self.rank_5:
-            rankn = 5
-        else:
-            rankn = 6
-        rank_txt = self.mark_rank * rankn
+        rank_txt = ""
+        if self.rank_on:
+            rank_txt = self.rank_txt(spent)
         if str(expected) == actual:
             logger.info("formula " +
                         layout_log % tuple([index] + equation) + " ends")
             print layout_mark % (self.mark_c, spent, rank_txt)
+            return (spent, True)
         else:
             logger.info("formula " +
                         layout_log % tuple([index] + equation) +
                         " ends with error: " + actual)
             print layout_mark % (self.mark_w, spent, rank_txt)
+            return (spent, False)
+
+    def rank_txt(self, time_spent):
+        rankn = 0
+        if time_spent >= self.rank_0:
+            rankn = 0
+        elif time_spent >= self.rank_1:
+            rankn = 1
+        elif time_spent >= self.rank_2:
+            rankn = 2
+        elif time_spent >= self.rank_3:
+            rankn = 3
+        elif time_spent >= self.rank_4:
+            rankn = 4
+        elif time_spent >= self.rank_5:
+            rankn = 5
+        else:
+            rankn = 6
+        return self.mark_rank * rankn
