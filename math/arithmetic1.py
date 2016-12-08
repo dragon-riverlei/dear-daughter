@@ -51,6 +51,39 @@ class QiaoArith():
     def __init__(self):
         self.load_default_formulas()
 
+    def menu(self):
+        menu = """
+ 1. 10以内加法
+ 2. 10以内减法
+ 3. 10以内加减
+ 4. 10以内连加
+ 5. 10以内连减
+ 6. 10以内连加连减
+
+ 7. 20以内不进位加法
+ 8. 20以内不退位减法
+ 9. 20以内不进位不退位
+10. 20以内进位加法
+11. 20以内退位减法
+12. 20以内进位退位加减
+
+13. 20以内加减
+14. 20以内连加
+15. 20以内连减
+16. 20以内连加连减
+        """
+        os.system('clear')
+        print menu
+        num = raw_input("Enter a number: ")
+        f = self.f1_1
+        if str(num) == "1":
+            f = [(0, 10), '+', (0, 10), '=', (0, 10)]
+        elif str(num) == "2":
+            f = [(0, 10), '-', (0, 10), '=', (0, 10)]
+        else:
+            f = self.f1_1
+        self.generate(f)
+
     def load_default_formulas(self):
         self.f1_1 = [(self.min_default, self.max_default),
                      '+',
@@ -182,7 +215,7 @@ class QiaoArith():
                           "when result is specified."
             expected = range(formula[-1][0], formula[-1][1]+1)
             got = range(lb, ub+1)
-            if len(set(expected) & set(got)) > 0:
+            if len(set(expected) & set(got)) < 1:
                 print "Specified result range out of possible range."
                 return False
         return True
@@ -228,6 +261,7 @@ class QiaoArith():
             results = []
             for e in equations:
                 expected = e[qpos - 1]
+                print e
                 e[qpos - 1] = self.valid_operators[4]
                 results.append(self.display_reply(expected, e, index))
                 index += 1
@@ -268,8 +302,41 @@ class QiaoArith():
             f = [r] + formula[3:]
             return [op1, op, op2] + self.forward_scan(f)[1:]
 
-    def backward_scan(self, formula):
-        return ("", "")
+    def backward_scan(self, formula, equation):
+        if type(formula[-1]) is tuple:
+            results = range(formula[-1][0], formula[-1][1] + 1)
+            ir = int(math.floor(random.random() * len(results)))
+            result = results[ir]
+        else:
+            result = formula[-1]
+        if len(formula) == 3:
+            if formula[0][0] <= result <= formula[0][1]:
+                equation.append(result)
+                return True
+            else:
+                return False
+        else:
+            op2s = range(formula[-3][0], formula[-3][1] + 1)
+            idx_map = [0] * len(op2s)
+            while (len([idx for idx in idx_map if idx == 0]) != 0):
+                i2 = int(math.floor(random.random() * len(op2s)))
+                op2 = op2s[i2]
+                idx_map[i2] += 1
+                op = formula[-4]
+                if op == "":
+                    if random.random() > 0.5:
+                        op = "+"
+                    else:
+                        op = "-"
+                while (op == "+" and result < op2):
+                    i2 = int(math.floor(random.random() * len(op2s)))
+                    op2 = op2s[i2]
+                sub_result = self.calculate(result, self.oppo_op(op), op2)
+                sub_formula = formula[0:-4] + ['=', sub_result]
+                if self.backward_scan(self, sub_formula) is True:
+                    equation + [op, op2]
+                    return True
+            return False
 
     def calculate(self, op1, op, op2):
         if op == self.valid_operators[0]:
@@ -282,6 +349,12 @@ class QiaoArith():
     def calculate_wrapper(self, x, y):
         r = self.calculate(x[1], y[0], y[1])
         return (self.valid_operators[0], r)
+
+    def oppo_op(self, op):
+        if op == "+":
+            return "-"
+        else:
+            return "+"
 
     def display_reply(self, expected, equation, index):
         if self.vertical:
