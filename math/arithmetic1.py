@@ -333,8 +333,12 @@ class QiaoArith():
                     op2 = op2s[i2]
                 sub_result = self.calculate(result, self.oppo_op(op), op2)
                 sub_formula = formula[0:-4] + ['=', sub_result]
-                if self.backward_scan(self, sub_formula) is True:
-                    equation + [op, op2]
+                if self.backward_scan(sub_formula, equation) is True:
+                    equation.append(op)
+                    equation.append(op2)
+                    if type(formula[-1]) is tuple:
+                        equation.append(formula[-2])
+                        equation.append(result)
                     return True
             return False
 
