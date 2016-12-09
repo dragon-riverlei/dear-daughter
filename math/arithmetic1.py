@@ -47,6 +47,7 @@ class QiaoArith():
     valid_operators = ['+', '-', '', '=', '?']
     valid_operands = [int]
     vertical = False
+    shifting = False
 
     def __init__(self):
         self.load_default_formulas()
@@ -76,12 +77,6 @@ class QiaoArith():
         print menu
         num = raw_input("Enter a number: ")
         f = self.f1_1
-        if str(num) == "1":
-            f = [(0, 10), '+', (0, 10), '=', (0, 10)]
-        elif str(num) == "2":
-            f = [(0, 10), '-', (0, 10), '=', (0, 10)]
-        else:
-            f = self.f1_1
         self.generate(f)
 
     def load_default_formulas(self):
@@ -236,8 +231,8 @@ class QiaoArith():
             "generate begins with formula " + str(formula))
         if formula[-2] == '=':
             while(self.index_less_than(count)):
-                equation = self.backward_scan(formula)
-                if equation is not None:
+                equation = []
+                if self.backward_scan(formula, equation) is True:
                     equations.append(equation)
                     self.inc_index()
         else:
@@ -292,7 +287,7 @@ class QiaoArith():
         op2s = range(formula[2][0], formula[2][1] + 1)
         i2 = int(math.floor(random.random() * len(op2s)))
         op2 = op2s[i2]
-        while (op == "-" and op1 < op2):
+        while not self.found_forward():
             i2 = int(math.floor(random.random() * len(op2s)))
             op2 = op2s[i2]
         if len(formula) == 3:
@@ -318,19 +313,18 @@ class QiaoArith():
         else:
             op2s = range(formula[-3][0], formula[-3][1] + 1)
             idx_map = [0] * len(op2s)
+            op = formula[-4]
+            if op == "":
+                if random.random() > 0.5:
+                    op = "+"
+                else:
+                    op = "-"
             while (len([idx for idx in idx_map if idx == 0]) != 0):
                 i2 = int(math.floor(random.random() * len(op2s)))
                 op2 = op2s[i2]
                 idx_map[i2] += 1
-                op = formula[-4]
-                if op == "":
-                    if random.random() > 0.5:
-                        op = "+"
-                    else:
-                        op = "-"
-                while (op == "+" and result < op2):
-                    i2 = int(math.floor(random.random() * len(op2s)))
-                    op2 = op2s[i2]
+                if not self.found_backward(result, self.oppo_op(op), op2):
+                    continue
                 sub_result = self.calculate(result, self.oppo_op(op), op2)
                 sub_formula = formula[0:-4] + ['=', sub_result]
                 if self.backward_scan(sub_formula, equation) is True:
@@ -446,3 +440,35 @@ class QiaoArith():
         else:
             rankn = 6
         return self.mark_rank * rankn
+
+    def shifting_comply(self, op1, op, op2):
+        if self.shifting is True:
+            return True
+        if op == "+":
+            if int(str(op1)[-1]) + int(str(op2)[-1]) < 10:
+                return True
+            else:
+                return False
+        else:
+            if int(str(op1)[-1]) - int(str(op2)[-1]) >= 0:
+                return True
+            else:
+                return False
+
+    def found_forward(self, op1, op, op2):
+        if self.shifting_comply(op1, op, op2) is True:
+            if op == "-" and op1 >= op2:
+                return True
+            else:
+                return False
+        else:
+            return False
+
+    def found_backward(self, result, opop, op2):
+        if self.shifting_comply(result, opop, op2) is True:
+            if opop == "-" and result >= op2:
+                return True
+            else:
+                return False
+        else:
+            return False
