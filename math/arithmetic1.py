@@ -245,6 +245,9 @@ class QiaoArith():
                     equations.append(
                         equation + [self.valid_operators[3], result])
                     self.inc_index()
+        return equations
+
+    def display(self, equations, qpos="last"):
         if qpos == "last":
             qpos = len(equations[0])
         elif int(qpos) > len(equations[0]):
@@ -256,13 +259,11 @@ class QiaoArith():
             results = []
             for e in equations:
                 expected = e[qpos - 1]
-                print e
                 e[qpos - 1] = self.valid_operators[4]
                 results.append(self.display_reply(expected, e, index))
                 index += 1
         except KeyboardInterrupt:
-            logger.info(
-                "generate cancelled with formula " + str(formula))
+            logger.info("cancelled")
         times = [r[0] for r in results]
         average = numpy.mean(times)
         rank_txt = self.rank_txt(average)
